@@ -1,0 +1,6 @@
+jupyter
+numpy>=1.17,<2.0
+pandas==2.1.4
+nbformat
+nbclient
+nbconvert

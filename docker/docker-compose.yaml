@@ -1,0 +1,26 @@
+services:
+  jupyter:    # 这里添加冒号
+    build:
+      context: .
+      dockerfile: dockerfile_jupyter
+      args:
+        BASE_IMAGE: ${RUNNER_IMAGE}
+        JUPYTER_TOKEN: ${JUPYTER_TOKEN}
+    image: ${JUPYTER_IMAGE_NAME}_${VERSION}
+    container_name: ${JUPYTER_CONTAINER_NAME}_${VERSION}
+    restart: unless-stopped
+    environment:
+      MODE: service
+    volumes:
+      - ../notebook:/app/notebook
+      - smb_data:/app/remote_data
+    ports:
+      - "$JUPYTER_EXPOSE_PORT:80"
+
+volumes:
+  smb_data:
+    driver: local
+    driver_opts:
+      type: cifs
+      o: "username=bot,password=bot123456,domain=mydomain,iocharset=utf8"
+      device: "//172.16.32.217/Test"      

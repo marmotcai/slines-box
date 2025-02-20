@@ -1,0 +1,41 @@
+# Use the official Python image from the Docker Hub
+ARG BASE_IMAGE=python:3.10-slim
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="marmotcai@163.com"
+
+ARG JUPYTER_TOKEN=12345678
+
+ENV DATA_PATH="/app/notebook"
+USER root
+
+#######################################################
+
+ENV PIP_MIRRORS_URL="https://mirrors.aliyun.com/pypi/simple/"
+ENV PIP_MIRRORS_URL="https://pypi.tuna.tsinghua.edu.cn/simple"
+
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources
+RUN apt-get update && apt-get install -y procps
+
+RUN pip config set global.index-url ${PIP_MIRRORS_URL}
+RUN python -m pip install --upgrade pip
+
+WORKDIR /root/
+
+COPY requirements_jupyter.txt ./requirements.txt
+RUN pip install -r requirements.txt
+
+RUN jupyter notebook --generate-config
+
+ENV JUPYTER_NOTEBOOK_CONFIG=/root/.jupyter/jupyter_notebook_config.py
+
+RUN echo 'c.ServerApp.notebook_dir = "/app/notebook"' >> ${JUPYTER_NOTEBOOK_CONFIG}
+RUN echo 'c.ServerApp.open_browser = False' >> ${JUPYTER_NOTEBOOK_CONFIG}
+RUN echo 'c.ServerApp.port  = 80' >> ${JUPYTER_NOTEBOOK_CONFIG}
+RUN echo "c.ServerApp.token = '${JUPYTER_TOKEN}'" >> ${JUPYTER_NOTEBOOK_CONFIG}
+
+COPY entrypoint.sh .
+
+EXPOSE 80
+
+CMD ["bash", "entrypoint.sh"]
