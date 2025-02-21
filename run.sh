@@ -16,7 +16,7 @@ while getopts "bard:" opt; do
         param1=$1
 
         if [ "$param1" = "build" ]; then
-            CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up --build"
+            CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
         else
             CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up $param1"
         fi
