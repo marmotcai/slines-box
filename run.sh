@@ -2,13 +2,12 @@
 
 # 定义帮助信息函数
 print_help() {
-  echo "使用方法: $0 [-b] [-a] [-r [build|<container_name>]]"
+  echo "使用方法: $0 [-a] [-b [build|push]]"
   echo "选项："
-  echo "  -b    构建基础镜像"
   echo "  -a    构建应用镜像"
-  echo "  -r    运行容器"
+  echo "  -b    运行容器"
   echo "        - build: 构建并运行容器"
-  echo "        - <container_name>: 运行指定容器"
+  echo "        - push: 推送容器"
   exit 1
 }
 
@@ -26,31 +25,27 @@ if [ $# -eq 0 ]; then
   print_help
 fi
 
-while getopts "bar:h" opt; do
+while getopts "ab:h" opt; do
   case $opt in
-  r)
-    param1=$OPTARG
-    echo ${param1}
-
-    if [ -z "$param1" ]; then
-      echo "错误: -r 选项需要参数" >&2
-      print_help
-    fi
-
-    if [ "$param1" = "build" ]; then
-      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
-    else
-      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up $param1"
-    fi
-    ;;
-
   b)
-    echo "构建基础镜像"
-    CMD="docker build -t ${IMAGE_NAME} . \
-        -f docker/dockerfile \
-        --build-arg BASE_IMAGE=${BASE_IMAGE} \
-        --build-arg RUNNER_IMAGE=${RUNNER_IMAGE}
-        "
+    # 使用逗号分隔多个参数
+    IFS=',' read -ra params <<< "$OPTARG"
+    param1=${params[0]}
+    param2=${params[1]}
+    param3=${params[2]}
+
+    if [ "$param1" = "push" ]; then
+      # 然后使用 xargs 批量推送
+      docker images --format "{{.Repository}}:{{.Tag}}" | grep "192.168.193.7:20050" | xargs -n1 docker push
+      exit 0
+    elif [ "$param1" = "build" ]; then
+      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
+    elif [ "$param1" = "run" ]; then
+      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up $param2"
+    fi
+    
+    echo ${CMD}
+    ( ${CMD} )
     ;;
 
   a)
@@ -77,12 +72,3 @@ while getopts "bar:h" opt; do
     ;;
   esac
 done
-
-# 检查是否设置了CMD
-if [ -z "$CMD" ]; then
-  echo "错误: 无效的参数组合" >&2
-  print_help
-fi
-
-echo ${CMD}
-( ${CMD} )
