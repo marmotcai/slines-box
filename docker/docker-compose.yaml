@@ -35,6 +35,8 @@ services:
     volumes:
       - /mnt/user/data/devspaces:/app/data
       - /mnt/user/appdata/codeserver:/config
+      - ${DOCKER_BIN_PATH}:/usr/bin/docker
+      - ${DOCKER_SOCK_PATH}:/var/run/docker.sock
     environment:
       - CERT_PATH=
       - CERT_KEY_PATH=
