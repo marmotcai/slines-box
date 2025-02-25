@@ -4,17 +4,19 @@
 print_help() {
   echo "使用方法: $0 [-a] [-b [build|push]]"
   echo "选项："
-  echo "  -a    构建应用镜像"
   echo "  -b    运行容器"
   echo "        - build: 构建并运行容器"
   echo "        - push: 推送容器"
+  echo "        - run: 运行容器"
+  echo "  -t    安装工具"
+  echo "        - docker-compose: 安装 docker-compose"
   exit 1
 }
 
 # 获取完整的命令行
 MAIN_DIR=$(dirname "$(readlink -f "$0")")
 env_file="${MAIN_DIR}/.env"
-echo ${env_file}
+# echo ${env_file}
 
 if [ -f ${env_file} ]; then
   source ${env_file}
@@ -28,24 +30,26 @@ fi
 while getopts "b:t:h" opt; do
   case $opt in
   b)
-    # 使用逗号分隔多个参数
-    IFS=',' read -ra params <<< "$OPTARG"
-    param1=${params[0]}
-    param2=${params[1]}
-    param3=${params[2]}
-
-    if [ "$param1" = "push" ]; then
-      # 然后使用 xargs 批量推送
-      docker images --format "{{.Repository}}:{{.Tag}}" | grep "192.168.193.7:20050" | xargs -n1 docker push
-      exit 0
-    elif [ "$param1" = "build" ]; then
-      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
-    elif [ "$param1" = "run" ]; then
-      CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up $param2"
-    fi
-    
-    echo ${CMD}
-    ( ${CMD} )
+    action="$OPTARG"
+    case "$action" in
+      build)
+        CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
+        ;;
+      push)
+        # 使用 while 循环代替 xargs
+        CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
+        ;;
+      run)
+        # 获取下一个参数作为服务名
+        shift $((OPTIND-1))
+        service="$1"
+        CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up ${service}"
+        ;;
+      *)
+        echo "未知的操作: $action"
+        print_help
+        ;;
+    esac
     ;;
 
   t)
@@ -73,3 +77,8 @@ while getopts "b:t:h" opt; do
     ;;
   esac
 done
+
+if [ -n "$CMD" ]; then
+  echo "执行命令: $CMD"
+  eval "$CMD"
+fi

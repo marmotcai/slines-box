@@ -1,5 +1,5 @@
 x-base: &base
-  restart: unless-stopped
+  restart: always
 
 x-networks: &networks
   networks:
@@ -22,7 +22,7 @@ x-volumes: &volumes
 services:
 
   code-server:
-    <<: [*base, *volumes, *networks]
+    <<: [*base, *networks]
     build:
       context: .
       dockerfile: docker/codeserver/dockerfile
@@ -33,6 +33,7 @@ services:
     ports:
       - "${CODESERVER_EXPOSE_PORT}:8500"
     volumes:
+      - /mnt/user/data/devspaces:/app/data
       - /mnt/user/appdata/codeserver:/config
     environment:
       - CERT_PATH=
@@ -76,7 +77,6 @@ services:
         JUPYTER_TOKEN: ${PASSWORD}
     image: ${IMAGE_REGISTRY_NAME}/${JUPYTER_IMAGE_NAME}:${VERSION}
     container_name: ${JUPYTER_CONTAINER_NAME}_${VERSION}
-    restart: unless-stopped
     environment:
       MODE: service
     ports:
