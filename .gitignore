@@ -172,4 +172,3 @@ cython_debug/
 # compiled product
 env
 main
-data/
