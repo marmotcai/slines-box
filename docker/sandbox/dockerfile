@@ -36,7 +36,7 @@ RUN rm -rf /var/lib/apt/lists/* \
     && rm -f /opt/node-v20.11.1-linux-x64.tar.xz
 
 # 在新的阶段中设置工作目录
-WORKDIR /app/data
+WORKDIR /app/sandbox
 COPY conf/config.yaml ./conf/config.yaml
 
 # 从构建器阶段复制编译好的应用程序到当前阶段

@@ -25,7 +25,7 @@ if [ $# -eq 0 ]; then
   print_help
 fi
 
-while getopts "ab:h" opt; do
+while getopts "b:t:h" opt; do
   case $opt in
   b)
     # 使用逗号分隔多个参数
@@ -48,19 +48,20 @@ while getopts "ab:h" opt; do
     ( ${CMD} )
     ;;
 
-  a)
-    echo "构建应用镜像"
-    echo "GIT用户名:"
-    read username
-    echo "GIT密码:"
-    read -s password
+  t)
+    # 使用逗号分隔多个参数
+    IFS=',' read -ra params <<< "$OPTARG"
+    param1=${params[0]}
+    param2=${params[1]}
+    param3=${params[2]}
 
-    CMD="docker build -t ${IMAGE_NAME}_app . \
-        -f docker/dockerfile_app \
-        --build-arg RUNNER_IMAGE=${IMAGE_NAME} \
-        --build-arg GIT_USERNAME=${username} \
-        --build-arg GIT_PASSWORD=${password}"
-    ;;
+    if [ "$param1" = "docker-compose" ]; then
+      export HTTPS_PROXY=192.168.193.7:30090
+      curl -L https://github.com/docker/compose/releases/download/v2.29.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+      chmod +x /usr/local/bin/docker-compose    
+    fi
+
+    ;;    
 
   h)
     print_help
