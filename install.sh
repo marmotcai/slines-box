@@ -1,7 +1,7 @@
 # check if ubuntu/debain
 if [ -f /etc/debian_version ]; then
     apt-get -y update
-    apt-get install -y pkg-config gcc libseccomp-dev
+    apt-get install -y pkg-config gcc libseccomp-dev --fix-missing
 # check if fedora
 elif [ -f /etc/fedora-release ]; then
     dnf install pkgconfig gcc libseccomp-devel
