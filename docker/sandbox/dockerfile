@@ -1,11 +1,25 @@
 # 第一阶段：构建环境
-ARG BASE_IMAGE=golang:1.20
+ARG BASE_IMAGE=golang:1.20-bookworm
 ARG RUNNER_IMAGE=python:3.10.14-slim-bookworm
 
 FROM ${BASE_IMAGE} AS builder
 
 # 设置工作目录
 WORKDIR /app
+
+# 替换为清华源（兼容旧版 Docker 的写法）
+RUN rm -f /etc/apt/sources.list.d/debian.sources && \
+    echo "Types: deb" > /etc/apt/sources.list.d/debian.sources && \
+    echo "URIs: https://mirrors.tuna.tsinghua.edu.cn/debian" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Suites: bookworm bookworm-updates bookworm-backports" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Components: main contrib non-free non-free-firmware" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Types: deb" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "URIs: https://mirrors.tuna.tsinghua.edu.cn/debian-security" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Suites: bookworm-security" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Components: main contrib non-free non-free-firmware" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg" >> /etc/apt/sources.list.d/debian.sources
 
 # 复制源代码到容器中
 COPY . .

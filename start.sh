@@ -15,7 +15,7 @@ print_help() {
 
 # 获取完整的命令行
 MAIN_DIR=$(dirname "$(readlink -f "$0")")
-env_file="${MAIN_DIR}/.env"
+env_file="${MAIN_DIR}/docker/.env"
 # echo ${env_file}
 
 if [ -f ${env_file} ]; then
@@ -31,20 +31,31 @@ while getopts "b:t:h" opt; do
   case $opt in
   b)
     action="$OPTARG"
+    
     case "$action" in
-      build)
-        CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml --project-directory ${MAIN_DIR} up --build"
-        ;;
       push)
         # 使用 while 循环代替 xargs
         CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
         ;;
-      run)
-        # 获取下一个参数作为服务名
+
+      build|up|down)
         shift $((OPTIND-1))
-        service="$1"
-        CMD="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml up ${service}"
+        service="${1:-}"  # 允许服务名为空
+        if [ -z "$service" ]; then
+            service=${START_SERVICE_LIST}
+        fi
+
+        # 动态构建命令
+        base_cmd="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml"
+        [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
+        [ "$action" = "up" ] && base_cmd+=" up -d"
+        [ "$action" = "down" ] && base_cmd+=" down"
+
+        # 仅在服务名存在时追加
+        [ -n "$service" ] && base_cmd+=" $service"
+        CMD="$base_cmd"
         ;;
+
       *)
         echo "未知的操作: $action"
         print_help
