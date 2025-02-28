@@ -40,7 +40,20 @@ RUN ARCH=$(uname -m) && \
 # 第二阶段：运行环境
 FROM ${RUNNER_IMAGE} AS runner
 
-RUN touch /etc/apt/sources.list && sed -i 's/http:\/\/deb.debian.org/http:\/\/mirrors.aliyun.com/' /etc/apt/sources.list
+# 替换为清华源（兼容旧版 Docker 的写法）
+RUN rm -f /etc/apt/sources.list.d/debian.sources && \
+    echo "Types: deb" > /etc/apt/sources.list.d/debian.sources && \
+    echo "URIs: https://mirrors.tuna.tsinghua.edu.cn/debian" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Suites: bookworm bookworm-updates bookworm-backports" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Components: main contrib non-free non-free-firmware" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Types: deb" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "URIs: https://mirrors.tuna.tsinghua.edu.cn/debian-security" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Suites: bookworm-security" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Components: main contrib non-free non-free-firmware" >> /etc/apt/sources.list.d/debian.sources && \
+    echo "Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg" >> /etc/apt/sources.list.d/debian.sources
+
 RUN apt-get clean && apt-get update && apt-get install -y wget xz-utils binutils pkg-config libseccomp-dev build-essential libgl1-mesa-glx libglib2.0-0
 RUN rm -rf /var/lib/apt/lists/* \
     && python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple jinja2 requests httpx PySocks httpx[socks] \
