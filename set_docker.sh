@@ -8,7 +8,7 @@ fi
 
 # Create daemon.json content
 DAEMON_CONFIG='{
-  "insecure-registries": ["192.168.193.7:20050", "registry.atoml.net:20050"]
+  "insecure-registries": ["192.168.1.7:20050", "registry.atoml.net:20050"]
 }'
 
 # Ensure /etc/docker directory exists
