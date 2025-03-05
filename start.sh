@@ -71,7 +71,7 @@ while getopts "b:t:h" opt; do
     param3=${params[2]}
 
     if [ "$param1" = "docker-compose" ]; then
-      export HTTPS_PROXY=192.168.1.7:30090
+      export HTTPS_PROXY=proxy.atoml.net:30090
       curl -L https://github.com/docker/compose/releases/download/v2.29.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
       chmod +x /usr/local/bin/docker-compose    
     fi

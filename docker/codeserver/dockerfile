@@ -7,7 +7,7 @@ LABEL maintainer="marmotcai@163.com"
 ENV DATA_PATH="/app/devspace"
 USER root
 
-ENV HTTPS_PROXY=192.168.1.7:30090
+ENV HTTPS_PROXY=192.168.193.7:30090
 RUN curl -L https://github.com/docker/compose/releases/download/v2.29.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 RUN chmod +x /usr/local/bin/docker-compose
 
