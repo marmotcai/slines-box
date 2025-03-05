@@ -137,7 +137,7 @@ services:
       - middleware
     restart: always
     ports:
-      - "${EXPOSE_DB_PORT:-5432}:5432"
+      - "${PGVECTOR_EXPOSE_PORT:-5432}:5432"
     volumes:
       - /etc/hosts:/etc/hosts 
       - /etc/localtime:/etc/localtime
