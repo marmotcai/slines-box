@@ -15,7 +15,7 @@ print_help() {
 
 # 获取完整的命令行
 MAIN_DIR=$(dirname "$(readlink -f "$0")")
-env_file="${MAIN_DIR}/docker/.env"
+env_file="${MAIN_DIR}/.env"
 # echo ${env_file}
 
 if [ -f ${env_file} ]; then
@@ -46,7 +46,7 @@ while getopts "b:t:h" opt; do
         fi
 
         # 动态构建命令
-        base_cmd="docker-compose --env-file ${env_file} -f docker/docker-compose.yaml"
+        base_cmd="docker-compose --env-file ${env_file} -f docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
