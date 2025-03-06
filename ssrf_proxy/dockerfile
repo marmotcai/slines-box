@@ -5,10 +5,10 @@ FROM ${BASE_IMAGE}
 LABEL maintainer="marmotcai@163.com"
 
 COPY ./ssrf_proxy/squid.conf.template /etc/squid/squid.conf.template
-COPY ./ssrf_proxy/docker-entrypoint.sh /docker-entrypoint-mount.sh
 
-RUN cp /docker-entrypoint-mount.sh /docker-entrypoint.sh
-RUN sed -i 's/\r$$//' /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+WORKDIR /app
+COPY ./ssrf_proxy/docker-entrypoint.sh .
+RUN sed -i 's/\r$$//' ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
-CMD ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
