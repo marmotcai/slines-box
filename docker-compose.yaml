@@ -124,13 +124,38 @@ services:
       timeout: 3s
       retries: 30
 
+  minio:
+    image: ghcr.io/imagegenius/minio
+    container_name: ${MINIO_CONTAINER_NAME}
+    profiles:
+      - all
+      - storage
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${PASSWORD:-minioadmin}
+      PUID: 99
+      PGID: 100
+      UMASK: 022
+    volumes:
+      - ${DATA_DIR}/minio:/config
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live' ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    ports:
+      - "${MINIO_EXPOSE_WEB_PORT:-9000}:9000"
+      - "${MINIO_EXPOSE_CONSOLE_PORT:-9001}:9001"
+
   # The Weaviate vector store.
   weaviate:
     image: ${WEAVIATE_IMAGE}
     container_name: ${WEAVIATE_CONTAINER_NAME}_${VERSION}
     profiles:
       - all
-      - weaviate
+      - storage
     restart: always
     volumes:
       # Mount the Weaviate data directory to the container.
