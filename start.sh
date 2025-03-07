@@ -43,7 +43,7 @@ while getopts "m:d:t:h" opt; do
         CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
         ;;
 
-      build|up|down)
+      build|up|down|restart)
         shift $((OPTIND-1))
         profile="${1:-}"  # 允许服务名为空
         if [ -z "$profile" ]; then
@@ -55,6 +55,7 @@ while getopts "m:d:t:h" opt; do
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
+        [ "$action" = "restart" ] && base_cmd+=" restart"
 
         CMD="$base_cmd"
         ;;
@@ -75,7 +76,7 @@ while getopts "m:d:t:h" opt; do
         CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
         ;;
 
-      build|up|down)
+      build|up|down|restart)
         shift $((OPTIND-1))
         profile="${1:-}"  # 允许服务名为空
         if [ -z "$profile" ]; then
@@ -87,6 +88,7 @@ while getopts "m:d:t:h" opt; do
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
+        [ "$action" = "restart" ] && base_cmd+=" restart"
 
         CMD="$base_cmd"
         ;;
