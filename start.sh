@@ -2,12 +2,16 @@
 
 # 定义帮助信息函数
 print_help() {
-  echo "使用方法: $0 [-a] [-b [build|push]]"
+  echo "使用方法: $0 [-a] [-m [build|push]] [-d [build|push]]"
   echo "选项："
-  echo "  -b    运行容器"
+  echo "  -m    中间件服务"
   echo "        - build: 构建并运行容器"
   echo "        - push: 推送容器"
   echo "        - up: 运行容器"
+  echo "  -d    Dify服务"
+  echo "        - build: 构建并运行容器"
+  echo "        - push: 推送容器"
+  echo "        - up: 运行容器"  
   echo "  -t    安装工具"
   echo "        - docker-compose: 安装 docker-compose"
   exit 1
@@ -16,6 +20,7 @@ print_help() {
 # 获取完整的命令行
 MAIN_DIR=$(dirname "$(readlink -f "$0")")
 env_file="${MAIN_DIR}/.env"
+dify_env_file="${MAIN_DIR}/dify/.env"
 # echo ${env_file}
 
 if [ -f ${env_file} ]; then
@@ -27,9 +32,9 @@ if [ $# -eq 0 ]; then
   print_help
 fi
 
-while getopts "b:t:h" opt; do
+while getopts "m:d:t:h" opt; do
   case $opt in
-  b)
+  m)
     action="$OPTARG"
     
     case "$action" in
@@ -47,6 +52,38 @@ while getopts "b:t:h" opt; do
 
         # 动态构建命令
         base_cmd="docker-compose --env-file ${env_file} --profile $profile -f docker-compose.yaml"
+        [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
+        [ "$action" = "up" ] && base_cmd+=" up -d"
+        [ "$action" = "down" ] && base_cmd+=" down"
+
+        CMD="$base_cmd"
+        ;;
+
+      *)
+        echo "未知的操作: $action"
+        print_help
+        ;;
+    esac
+    ;;
+
+  d)
+    action="$OPTARG"
+    
+    case "$action" in
+      push)
+        # 使用 while 循环代替 xargs
+        CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
+        ;;
+
+      build|up|down)
+        shift $((OPTIND-1))
+        profile="${1:-}"  # 允许服务名为空
+        if [ -z "$profile" ]; then
+            profile=${DEFAULT_PROFILE}
+        fi
+
+        # 动态构建命令
+        base_cmd="docker-compose --env-file ${dify_env_file} --profile $profile -f ./dify/docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
