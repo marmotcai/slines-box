@@ -25,7 +25,7 @@ RUN python -m pip install --upgrade pip
 
 WORKDIR /root/
 
-COPY docker/jupyter/* .
+COPY jupyter/* .
 RUN pip install -r requirements.txt
 
 RUN jupyter notebook --generate-config

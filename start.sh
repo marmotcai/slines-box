@@ -40,19 +40,17 @@ while getopts "b:t:h" opt; do
 
       build|up|down)
         shift $((OPTIND-1))
-        service="${1:-}"  # 允许服务名为空
-        if [ -z "$service" ]; then
-            service=${START_SERVICE_LIST}
+        profile="${1:-}"  # 允许服务名为空
+        if [ -z "$profile" ]; then
+            profile=${DEFAULT_PROFILE}
         fi
 
         # 动态构建命令
-        base_cmd="docker-compose --env-file ${env_file} -f docker-compose.yaml"
+        base_cmd="docker-compose --env-file ${env_file} --profile $profile -f docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
 
-        # 仅在服务名存在时追加
-        [ -n "$service" ] && base_cmd+=" $service"
         CMD="$base_cmd"
         ;;
 

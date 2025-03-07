@@ -30,7 +30,8 @@ services:
     image: ${IMAGE_REGISTRY_NAME}/${SANDBOX_IMAGE_NAME}:${VERSION}
     container_name: ${SANDBOX_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - sandbox
     environment:
       # The DifySandbox configurations
       # Make sure you are changing this key for your deployment with a strong key.
@@ -63,7 +64,8 @@ services:
     image: ${IMAGE_REGISTRY_NAME}/${SSRF_PROXY_IMAGE_NAME}:${VERSION}
     container_name: ${SSRF_PROXY_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - sandbox
     restart: always
     environment:
       # pls clearly modify the squid env vars to fit your network environment.
@@ -86,13 +88,14 @@ services:
     image: ${REDIS_IMAGE}
     container_name: ${REDIS_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - storage
     restart: always
     volumes:
       - /etc/hosts:/etc/hosts 
       # Mount the redis data directory to the container.
       - ${DATA_DIR}/redis:/data
-    # Set the redis password when startup redis server.
+      # Set the redis password when startup redis server.
     command: redis-server --requirepass ${PASSWORD}
     ports:
       - "${REDIS_EXPOSE_PORT:-6379}:6379"
@@ -101,7 +104,8 @@ services:
     image: ${PGVECTOR_IMAGE}
     container_name: ${PGVECTOR_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - storage
     restart: always
     ports:
       - "${EXPOSE_DB_PORT:-5432}:5432"
@@ -118,21 +122,49 @@ services:
       test: [ "CMD", "pg_isready" ]
       interval: 1s
       timeout: 3s
-      retries: 30    
-  
+      retries: 30
+
+  # The Weaviate vector store.
+  weaviate:
+    image: ${WEAVIATE_IMAGE}
+    container_name: ${WEAVIATE_CONTAINER_NAME}_${VERSION}
+    profiles:
+      - all
+      - weaviate
+    restart: always
+    volumes:
+      # Mount the Weaviate data directory to the container.
+      - ${DATA_DIR}/weaviate:/var/lib/weaviate
+    environment:
+      # The Weaviate configurations
+      # You can refer to the [Weaviate](https://weaviate.io/developers/weaviate/config-refs/env-vars) documentation for more information.
+      PERSISTENCE_DATA_PATH: ${WEAVIATE_PERSISTENCE_DATA_PATH:-/var/lib/weaviate}
+      QUERY_DEFAULTS_LIMIT: ${WEAVIATE_QUERY_DEFAULTS_LIMIT:-25}
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: ${WEAVIATE_AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED:-false}
+      DEFAULT_VECTORIZER_MODULE: ${WEAVIATE_DEFAULT_VECTORIZER_MODULE:-none}
+      CLUSTER_HOSTNAME: ${WEAVIATE_CLUSTER_HOSTNAME:-node1}
+      AUTHENTICATION_APIKEY_ENABLED: ${WEAVIATE_AUTHENTICATION_APIKEY_ENABLED:-true}
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: ${WEAVIATE_AUTHENTICATION_APIKEY_ALLOWED_KEYS:-WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih}
+      AUTHENTICATION_APIKEY_USERS: ${WEAVIATE_AUTHENTICATION_APIKEY_USERS:-hello@dify.ai}
+      AUTHORIZATION_ADMINLIST_ENABLED: ${WEAVIATE_AUTHORIZATION_ADMINLIST_ENABLED:-true}
+      AUTHORIZATION_ADMINLIST_USERS: ${WEAVIATE_AUTHORIZATION_ADMINLIST_USERS:-hello@dify.ai}
+    ports:
+      - "${WEAVIATE_EXPOSE_PORT:-8080}:8080"
+
   ################################################################################################
 
   code-server:
     <<: [*base, *networks]
     build:
       context: .
-      dockerfile: docker/codeserver/dockerfile
+      dockerfile: codeserver/dockerfile
       args:
         BASE_IMAGE: ${CODESERVER_IMAGE}
     image: ${IMAGE_REGISTRY_NAME}/${CODESERVER_IMAGE_NAME}:${VERSION}
     container_name: ${CODESERVER_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - dev
     ports:
       - "${CODESERVER_EXPOSE_PORT}:8500"
     volumes:
@@ -155,14 +187,15 @@ services:
     <<: [*base, *volumes]
     build:
       context: .
-      dockerfile: docker/jupyter/dockerfile
+      dockerfile: jupyter/dockerfile
       args:
         BASE_IMAGE: ${JUPYTER_PYTHON_IMAGE}
         JUPYTER_TOKEN: ${PASSWORD}
     image: ${IMAGE_REGISTRY_NAME}/${JUPYTER_IMAGE_NAME}:${VERSION}
     container_name: ${JUPYTER_CONTAINER_NAME}_${VERSION}
     profiles:
-      - middleware
+      - all
+      - dev
     environment:
       MODE: service
     ports:
@@ -175,6 +208,8 @@ services:
   plugin_daemon:
     image: ${PLUGIN_DAEMON_IMAGE}
     restart: always
+    profiles:
+      - dify
     environment:
       # Use the shared environment variables.
       DB_HOST: ${DB_HOST:-db}
