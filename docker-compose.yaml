@@ -5,7 +5,6 @@ x-volumes: &volumes
   volumes:
     - /etc/localtime:/etc/localtime:ro
     - /etc/hosts:/etc/hosts
-    - ./data:/app/data
 
 networks:
   ssrf_proxy_network:
@@ -193,7 +192,7 @@ services:
     ports:
       - "${CODESERVER_EXPOSE_PORT}:8500"
     volumes:
-      - ${DATA_DIR}/devspaces:/app/data
+      - ./:/app/data
       - ${DATA_DIR}/codeserver:/config
       - ${DOCKER_BIN_PATH}:/usr/bin/docker
       - ${DOCKER_SOCK_PATH}:/var/run/docker.sock
@@ -225,6 +224,10 @@ services:
       MODE: service
     ports:
       - "${JUPYTER_EXPOSE_PORT}:80"
+    volumes:
+      - ./data/jupyter:/app/data
+      - ${DOCKER_BIN_PATH}:/usr/bin/docker
+      - ${DOCKER_SOCK_PATH}:/var/run/docker.sock
     depends_on:
       - sandbox
 
