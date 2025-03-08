@@ -424,7 +424,7 @@ x-deploy-gpu: &deploy-gpu
 services:
   # API service
   api:
-    image: ${IMAGE_REGISTRY_NAME}/langgenius/dify-api:1.0.0
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:1.0.0
     container_name: ${IMAGE_NAME}_api_${VERSION:-latest}
     restart: always
     profiles:
@@ -448,7 +448,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: ${IMAGE_REGISTRY_NAME}/langgenius/dify-api:1.0.0
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:1.0.0
     container_name: ${IMAGE_NAME}_worker_${VERSION:-latest}
     restart: always
     profiles:
@@ -471,7 +471,7 @@ services:
 
   # Frontend web application.
   web:
-    image: ${IMAGE_REGISTRY_NAME}/langgenius/dify-web:${VERSION}
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-web:${VERSION}
     container_name: ${IMAGE_NAME}_web_${VERSION:-latest}
     restart: always
     profiles:
@@ -494,7 +494,7 @@ services:
   # The nginx reverse proxy.
   # used for reverse proxying the API service and Web service.
   nginx:
-    image: ${IMAGE_REGISTRY_NAME}/nginx/nginx:latest
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/nginx:latest
     container_name: ${IMAGE_NAME}_nginx_${VERSION:-latest}
     restart: always
     profiles:
@@ -538,7 +538,7 @@ services:
 
   # plugin daemon
   plugin_daemon:
-    image: ${IMAGE_REGISTRY_NAME}/langgenius/dify-plugin-daemon:0.0.3-local
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-plugin-daemon:0.0.3-local
     container_name: ${IMAGE_NAME}_plugin-daemon_${VERSION:-latest}    
     restart: always
     profiles:
@@ -565,7 +565,7 @@ services:
   # Certbot service
   # use `docker-compose --profile certbot up` to start the certbot service.
   certbot:
-    image: ${IMAGE_REGISTRY_NAME}/certbot/certbot
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/certbot
     container_name: ${IMAGE_NAME}_certbot_${VERSION:-latest}
     restart: always
     profiles:
