@@ -19,12 +19,31 @@ print_help() {
 
 # 获取完整的命令行
 MAIN_DIR=$(dirname "$(readlink -f "$0")")
-env_file="${MAIN_DIR}/.env"
+base_env_file="${MAIN_DIR}/.env"
 dify_env_file="${MAIN_DIR}/dify/.env"
-# echo ${env_file}
 
-if [ -f ${env_file} ]; then
-  source ${env_file}
+os_type=$(uname)
+if [[ -f /etc/unraid-version ]]; then
+  echo "Running on unRAID"
+  base_env_file="${MAIN_DIR}/.env_unraid"
+  dify_env_file="${MAIN_DIR}/dify/.env_unraid"
+elif [[ "$os_type" == "Darwin" ]]; then
+  echo "Running on macOS"
+  base_env_file="${MAIN_DIR}/.env_mac"
+  dify_env_file="${MAIN_DIR}/dify/.env_mac"
+elif [[ "$os_type" == "Linux" ]]; then
+  echo "Running on Linux"
+  base_env_file="${MAIN_DIR}/.env_linux"  
+  dify_env_file="${MAIN_DIR}/dify/.env_linux"
+else
+  echo "Unsupported OS: $os_type"
+  exit 1
+fi
+
+echo ${base_env_file}
+
+if [ -f ${base_env_file} ]; then
+  source ${base_env_file}
 fi
 
 # 如果没有参数，显示帮助信息
@@ -51,7 +70,7 @@ while getopts "m:d:t:h" opt; do
         fi
 
         # 动态构建命令
-        base_cmd="docker-compose --env-file ${env_file} --profile $profile -f docker-compose.yaml"
+        base_cmd="docker-compose --env-file ${base_env_file} --profile $profile -f docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
@@ -68,6 +87,11 @@ while getopts "m:d:t:h" opt; do
     ;;
 
   d)
+    echo ${dify_env_file}
+    if [ -f ${dify_env_file} ]; then
+      source ${dify_env_file}
+    fi
+
     action="$OPTARG"
     
     case "$action" in
@@ -86,7 +110,7 @@ while getopts "m:d:t:h" opt; do
         # 动态构建命令
         base_cmd="docker-compose --env-file ${dify_env_file} --profile $profile -f ./dify/docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
-        [ "$action" = "up" ] && base_cmd+=" up -d"
+        [ "$action" = "up" ] && base_cmd+=" up"
         [ "$action" = "down" ] && base_cmd+=" down"
         [ "$action" = "restart" ] && base_cmd+=" restart"
 
