@@ -1,0 +1,3 @@
+[submodule "slines"]
+	path = slines
+	url = ssh://git@git.atoml.net:20022/caijun/slines.git
