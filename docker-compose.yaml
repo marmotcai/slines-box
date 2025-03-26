@@ -31,6 +31,7 @@ services:
     profiles:
       - all
       - sandbox
+      - dev
     environment:
       # The DifySandbox configurations
       # Make sure you are changing this key for your deployment with a strong key.
@@ -65,6 +66,7 @@ services:
     profiles:
       - all
       - sandbox
+      - dev
     restart: always
     environment:
       # pls clearly modify the squid env vars to fit your network environment.
@@ -233,3 +235,24 @@ services:
       - sandbox
 
   ################################################################################################
+
+  llama_index:
+    <<: [*base, *volumes]
+    build:
+      context: .
+      dockerfile: llama_index/dockerfile
+      args:
+        BASE_IMAGE: ${IMAGE_REGISTRY_NAME}/${JUPYTER_IMAGE_NAME}:${VERSION}
+    image: ${IMAGE_REGISTRY_NAME}/${LLAMA_INDEX_IMAGE_NAME}:${VERSION}
+    container_name: ${LLAMA_INDEX_CONTAINER_NAME}_${VERSION}
+    profiles:
+      - all
+      - rag
+    environment:
+      MODE: keep
+    ports:
+      - "${LLAMA_INDEX_EXPOSE_PORT}:80"
+    volumes:
+      - ./llama_index/src:/app/src
+      - ${DOCKER_BIN_PATH}:/usr/bin/docker
+      - ${DOCKER_SOCK_PATH}:/var/run/docker.sock
