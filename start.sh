@@ -72,7 +72,7 @@ while getopts "m:d:t:h" opt; do
         # 动态构建命令
         base_cmd="docker-compose --env-file ${base_env_file} --profile $profile -f docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
-        [ "$action" = "up" ] && base_cmd+=" up -d"
+        [ "$action" = "up" ] && base_cmd+=" up" # -d"
         [ "$action" = "down" ] && base_cmd+=" down"
         [ "$action" = "restart" ] && base_cmd+=" restart"
 

@@ -88,7 +88,7 @@ services:
     container_name: ${REDIS_CONTAINER_NAME}_${VERSION}
     profiles:
       - all
-      - storage
+      - cache
     restart: always
     volumes:
       - /etc/hosts:/etc/hosts 
@@ -105,7 +105,8 @@ services:
     privileged: true
     profiles:
       - all
-      - storage
+      - db
+      - vector
     restart: always
     volumes:
       - /etc/hosts:/etc/hosts 
@@ -116,6 +117,8 @@ services:
       POSTGRES_PASSWORD: ${PGVECTOR_POSTGRES_PASSWORD:-$PASSWORD}
       POSTGRES_DB: ${PGVECTOR_POSTGRES_DB:-postgres}
       PGDATA: ${PGDATA:-/var/lib/postgresql/data/pgdata}
+  
+  
     healthcheck:
       test: [ "CMD", "pg_isready" ]
       interval: 1s
@@ -125,7 +128,7 @@ services:
       - "${PGVECTOR_EXPOSE_PORT:-5432}:5432"
     
   minio:
-    image: ghcr.io/imagegenius/minio
+    image: ${MINIO_IMAGE}
     container_name: ${MINIO_CONTAINER_NAME}
     profiles:
       - all
@@ -155,7 +158,7 @@ services:
     container_name: ${WEAVIATE_CONTAINER_NAME}_${VERSION}
     profiles:
       - all
-      - storage
+      - vector
     restart: always
     volumes:
       # Mount the Weaviate data directory to the container.
