@@ -23,7 +23,7 @@ ENV PIP_MIRRORS_URL="https://pypi.tuna.tsinghua.edu.cn/simple"
 RUN pip config set global.index-url ${PIP_MIRRORS_URL}
 RUN python -m pip install --upgrade pip
 
-WORKDIR /root/
+WORKDIR /app/jupyter
 
 COPY jupyter/* .
 RUN pip install -r requirements.txt

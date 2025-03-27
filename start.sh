@@ -12,6 +12,7 @@ print_help() {
   echo "        - build: 构建并运行容器"
   echo "        - push: 推送容器"
   echo "        - up: 运行容器"  
+  echo "        - upd: 运行容器(后台)"
   echo "  -t    安装工具"
   echo "        - docker-compose: 安装 docker-compose"
   exit 1
@@ -62,7 +63,7 @@ while getopts "m:d:t:h" opt; do
         CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
         ;;
 
-      build|up|down|restart)
+      build|up|upd|down|restart)
         shift $((OPTIND-1))
         profile="${1:-}"  # 允许服务名为空
         if [ -z "$profile" ]; then
@@ -72,7 +73,8 @@ while getopts "m:d:t:h" opt; do
         # 动态构建命令
         base_cmd="docker-compose --env-file ${base_env_file} --profile $profile -f docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
-        [ "$action" = "up" ] && base_cmd+=" up" # -d"
+        [ "$action" = "up" ] && base_cmd+=" up"
+        [ "$action" = "upd" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
         [ "$action" = "restart" ] && base_cmd+=" restart"
 
@@ -100,7 +102,7 @@ while getopts "m:d:t:h" opt; do
         CMD='docker images --format "{{.Repository}}:{{.Tag}}" | grep "${IMAGE_REGISTRY_NAME}" | while read img; do docker push "$img"; done'
         ;;
 
-      build|up|down|restart)
+      build|up|upd|down|restart)
         shift $((OPTIND-1))
         profile="${1:-}"  # 允许服务名为空
         if [ -z "$profile" ]; then
@@ -111,6 +113,7 @@ while getopts "m:d:t:h" opt; do
         base_cmd="docker-compose --env-file ${dify_env_file} --profile $profile -f ./dify/docker-compose.yaml"
         [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
         [ "$action" = "up" ] && base_cmd+=" up"
+        [ "$action" = "upd" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
         [ "$action" = "restart" ] && base_cmd+=" restart"
 

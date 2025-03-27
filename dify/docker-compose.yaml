@@ -424,7 +424,7 @@ x-deploy-gpu: &deploy-gpu
 services:
   # API service
   api:
-    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:1.0.0
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:${VERSION}
     container_name: ${IMAGE_NAME}_api_${VERSION:-latest}
     restart: always
     profiles:
@@ -450,7 +450,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:1.0.0
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/langgenius/dify-api:${VERSION}
     container_name: ${IMAGE_NAME}_worker_${VERSION:-latest}
     restart: always
     profiles:
@@ -528,7 +528,7 @@ services:
   # Certbot service
   # use `docker-compose --profile certbot up` to start the certbot service.
   certbot:
-    image: ${IMAGE_REGISTRY_NAME}/runtime-env/certbot
+    image: ${IMAGE_REGISTRY_NAME}/runtime-env/certbot/certbot
     container_name: ${IMAGE_NAME}_certbot_${VERSION:-latest}
     restart: always
     profiles:

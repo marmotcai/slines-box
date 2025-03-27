@@ -20,14 +20,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 设置工作目录
 WORKDIR /app
-
 RUN git clone --branch v0.12.24 https://github.com/run-llama/llama_index.git
+RUN pip install -e ./llama_index
 
-WORKDIR /app/llama_index
-RUN pip install -e .
-
+WORKDIR /app/rag_service
 # 复制依赖文件
-COPY ./llama_index/ .
+COPY ./rag-service/ .
 
 # 安装Python依赖
 RUN pip install -r requirements.txt
@@ -35,5 +33,4 @@ RUN pip install -r requirements.txt
 # 暴露端口
 EXPOSE 8000
 
-# 启动命令
 CMD ["bash", "entrypoint.sh"]

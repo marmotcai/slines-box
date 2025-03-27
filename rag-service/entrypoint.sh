@@ -8,4 +8,5 @@ if [[ "${MODE}" == "keep" ]]; then
 else
   echo "Starting in ${MODE} mode"
 
+  jupyter notebook --ip=0.0.0.0 --no-browser --allow-root
 fi
