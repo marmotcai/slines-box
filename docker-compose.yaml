@@ -20,13 +20,13 @@ services:
 
   # The DifySandbox
   sandbox:
-    build:
-      context: .
-      dockerfile: ./sandbox/dockerfile
-      args:
-        BASE_IMAGE: ${SANDBOX_GO_IMAGE}
-        RUNNER_IMAGE: ${SANDBOX_RUNNER_IMAGE}
-    image: ${IMAGE_REGISTRY_NAME}/${SANDBOX_IMAGE_NAME}:${VERSION}
+    # build:
+    #   context: .
+    #   dockerfile: ./sandbox/dockerfile
+    #   args:
+    #     BASE_IMAGE: ${SANDBOX_GO_IMAGE}
+    #     RUNNER_IMAGE: ${SANDBOX_RUNNER_IMAGE}
+    image: ${IMAGE_REGISTRY_NAME}/${SANDBOX_IMAGE_NAME}
     container_name: ${SANDBOX_CONTAINER_NAME}_${VERSION}
     profiles:
       - all
