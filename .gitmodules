@@ -1,6 +1,6 @@
 [submodule "slines"]
 	path = slines
-	url = git@github.com:marmotcai/slines.git
+	url = https://github.com/marmotcai/slines.git
 [submodule "dify-splugin"]
 	path = dify-splugin
-	url = git@github.com:marmotcai/dify-splugin.git
+	url = https://github.com/marmotcai/dify-splugin.git
