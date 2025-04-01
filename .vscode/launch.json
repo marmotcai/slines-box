@@ -17,7 +17,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "main",
-            "cwd": "${workspaceFolder}/dify/plugin/doc-reader",
+            "cwd": "${workspaceFolder}/dify-splugin/plugin/doc-reader",
             "jinja": true,
             "env": {
                 "GEVENT_SUPPORT": "True"
