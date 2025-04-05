@@ -15,6 +15,19 @@ x-networks: &networks
   networks:
     - default
 
+x-vllm: &vllm
+    build:
+      context: .
+      dockerfile: vllm/dockerfile
+      args:
+        BASE_IMAGE: ${VLLM_SERVICE_IMAGE}
+    image: ${IMAGE_REGISTRY_NAME}/${VLLM_SERVICE_IMAGE_NAME}:${VERSION}
+    container_name: ${VLLM_SERVICE_CONTAINER_NAME}_${VERSION}
+    profiles:
+      - llm
+    volumes:
+      - ${MODEL_DIR}:/app/model
+
 services:
   ################################################################################################
 
@@ -255,3 +268,25 @@ services:
       - ./rag-service:/app/rag-service
       - ${DOCKER_BIN_PATH}:/usr/bin/docker
       - ${DOCKER_SOCK_PATH}:/var/run/docker.sock
+
+  ################################################################################################
+  # The LLM service.
+
+  vllm_head:
+    <<: [*base, *vllm]
+
+    environment:
+      NODE_TYPE: head
+      SERVICE_PORT: ${VLLM_SERVICE_PORT:-6379}
+    ports:
+      - "${VLLM_SERVICE_EXPOSE_PORT:-6379}:${VLLM_SERVICE_PORT:-6379}"
+
+  vllm_worker:
+    <<: [*base, *vllm]
+    image: ${IMAGE_REGISTRY_NAME}/${VLLM_SERVICE_IMAGE_NAME}:${VERSION}
+    container_name: ${VLLM_SERVICE_CONTAINER_NAME}_worker_${VERSION}
+    environment:
+      NODE_TYPE: worker
+      HEAD_NODE_ADDRESS: ${VLLM_HEAD_NODE_ADDRESS:-vllm_head}:${VLLM_SERVICE_PORT:-6379}
+    depends_on:
+      - vllm_head

@@ -1,0 +1,24 @@
+ARG BASE_IMAGE=vllm/vllm-openai:v0.8.2
+FROM ${BASE_IMAGE}
+
+ENV TZ=Asia/Shanghai \
+    DEBIAN_FRONTEND=noninteractive \
+    VLLM_ENGINE_ITERATION_TIMEOUT_S=180 \
+    GLOO_SOCKET_IFNAME=enp5s0 \
+    TP_SOCKET_IFNAME=enp5s0 \
+    NCCL_SOCKET_IFNAME=enp5s0 \
+    NCCL_DEBUG=info \
+    NCCL_NET=Socket \
+    NCCL_IB_DISABLE=0
+
+RUN apt-get update &&  apt -y install \
+    dos2unix tzdata vim tree curl wget \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && dpkg-reconfigure --frontend noninteractive tzdata
+
+WORKDIR /app
+COPY ./vllm/entrypoint.sh .
+
+RUN  find ./ -type f -print0 | xargs -0 dos2unix  && chmod +x entrypoint.sh
+ENTRYPOINT ["bash", "./entrypoint.sh"]
