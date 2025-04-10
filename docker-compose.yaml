@@ -31,6 +31,39 @@ x-vllm: &vllm
 services:
   ################################################################################################
 
+  # Thne
+  windows:
+    image: ${IMAGE_REGISTRY_NAME}/${WINDOWS_IMAGE_NAME}
+    container_name: windows
+    environment:
+      VERSION: "11"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    environment:
+      VERSION: "/iso/windows.iso"
+      DISK_SIZE: "256G"
+      RAM_SIZE: "8G"
+      CPU_CORES: "4"
+      USERNAME: "atoml"
+      PASSWORD: "123456"
+      LANGUAGE: "Chinese"
+      REGION: "en-US"
+      KEYBOARD: "en-US"      
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - ${WINDOWS_EXPOSE_WEB_PORT}:8006
+      - ${WINDOWS_EXPOSE_RDP_PORT:-3389}:3389/tcp
+      - ${WINDOWS_EXPOSE_RDP_PORT:-3389}:3389/udp
+    volumes:
+      - ${DATA_DIR}/windows:/storage
+      - /root/windows.iso:/iso/windows.iso
+    restart: always
+    stop_grace_period: 2m
+
+  ################################################################################################
+
   # The DifySandbox
   sandbox:
     # build:
