@@ -26,7 +26,7 @@ x-vllm: &vllm
     profiles:
       - llm
     volumes:
-      - ${MODEL_DIR}:/app/model
+      - ${DATA_DIR}/models:/app/models
 
 services:
   ################################################################################################
@@ -35,19 +35,19 @@ services:
   windows:
     image: ${IMAGE_REGISTRY_NAME}/${WINDOWS_IMAGE_NAME}
     container_name: windows
-    environment:
-      VERSION: "11"
+    privileged: true
+    profiles:
+      - windows
     devices:
       - /dev/kvm
       - /dev/net/tun
     environment:
-      VERSION: "/iso/windows.iso"
       DISK_SIZE: "256G"
-      RAM_SIZE: "8G"
-      CPU_CORES: "4"
-      USERNAME: "atoml"
-      PASSWORD: "123456"
+      RAM_SIZE: "32G"
+      CPU_CORES: "32"
       LANGUAGE: "Chinese"
+      USERNAME: "user"
+      PASSWORD: "123456"
       REGION: "en-US"
       KEYBOARD: "en-US"      
     cap_add:
@@ -57,8 +57,38 @@ services:
       - ${WINDOWS_EXPOSE_RDP_PORT:-3389}:3389/tcp
       - ${WINDOWS_EXPOSE_RDP_PORT:-3389}:3389/udp
     volumes:
-      - ${DATA_DIR}/windows:/storage
-      - /root/windows.iso:/iso/windows.iso
+      - ${DATA_DIR}/windows-a:/storage
+      - /root/iso/Win11_22H2_Chinese_Simplified_x64v2.iso:/custom.iso
+    restart: always
+    stop_grace_period: 2m
+
+  windows-b:
+    image: ${IMAGE_REGISTRY_NAME}/${WINDOWS_IMAGE_NAME}
+    container_name: windows-b
+    privileged: true
+    profiles:
+      - windows
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    environment:
+      DISK_SIZE: "256G"
+      RAM_SIZE: "32G"
+      CPU_CORES: "32"
+      LANGUAGE: "Chinese"
+      USERNAME: "user"
+      PASSWORD: "123456"
+      REGION: "en-US"
+      KEYBOARD: "en-US"      
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - ${WINDOWS_EXPOSE_WEB_PORT_2}:8006
+      - ${WINDOWS_EXPOSE_RDP_PORT_2:-3389}:3389/tcp
+      - ${WINDOWS_EXPOSE_RDP_PORT_2:-3389}:3389/udp
+    volumes:
+      - ${DATA_DIR}/windows-b:/storage
+      - /root/iso/Win11_22H2_Chinese_Simplified_x64v2.iso:/custom.iso
     restart: always
     stop_grace_period: 2m
 
