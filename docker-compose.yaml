@@ -24,7 +24,7 @@ x-vllm: &vllm
     image: ${IMAGE_REGISTRY_NAME}/${VLLM_SERVICE_IMAGE_NAME}:${VERSION}
     container_name: ${VLLM_SERVICE_CONTAINER_NAME}_${VERSION}
     profiles:
-      - llm
+      - vllm
     volumes:
       - ${DATA_DIR}/models:/app/models
 
@@ -352,3 +352,34 @@ services:
       HEAD_NODE_ADDRESS: ${VLLM_HEAD_NODE_ADDRESS:-vllm_head}:${VLLM_SERVICE_PORT:-6379}
     depends_on:
       - vllm_head
+
+  ################################################################################################
+  # The Ollama service.
+
+  ollama-llm:  
+    build:
+      context: .
+      dockerfile: ollama/dockerfile
+      args:
+        BASE_IMAGE: ${OLLAMA_SERVICE_IMAGE}      
+    image: ${IMAGE_REGISTRY_NAME}/${OLLAMA_SERVICE_IMAGE_NAME}:${VERSION}
+    container_name: ${OLLAMA_SERVICE_CONTAINER_NAME}_${VERSION}
+    profiles:
+      - ollama
+    ports:
+      - "${OLLAMA_SERVICE_EXPOSE_PORT}:11434"
+    volumes:
+      - ${DATA_DIR}/ollama:/root/.ollama
+    pull_policy: always
+    restart: always
+    environment:
+      - MODE=service
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]  

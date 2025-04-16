@@ -1,0 +1,10 @@
+ARG BASE_IMAGE=ollama/ollama:latest
+FROM ${BASE_IMAGE}
+
+WORKDIR /app
+COPY ./ollama .
+
+# 暴露端口
+EXPOSE 11434
+
+ENTRYPOINT ["bash", "entrypoint.sh"]
