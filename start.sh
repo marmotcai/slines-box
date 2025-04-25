@@ -71,8 +71,8 @@ while getopts "m:d:t:h" opt; do
         fi
 
         # 动态构建命令
-        base_cmd="docker-compose --env-file ${base_env_file} --profile $profile -f docker-compose.yaml"
-        [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
+        base_cmd="docker-compose --env-file ${base_env_file} --profile $profile -f docker-compose.yaml --project-directory ${MAIN_DIR} "
+        [ "$action" = "build" ] && base_cmd+=" up --build"
         [ "$action" = "up" ] && base_cmd+=" up"
         [ "$action" = "upd" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
@@ -110,8 +110,8 @@ while getopts "m:d:t:h" opt; do
         fi
 
         # 动态构建命令
-        base_cmd="docker-compose --env-file ${dify_env_file} --profile $profile -f ./dify/docker-compose.yaml"
-        [ "$action" = "build" ] && base_cmd+=" --project-directory ${MAIN_DIR} up --build"
+        base_cmd="docker-compose --env-file ${dify_env_file} --profile $profile -f ./dify/docker-compose.yaml --project-directory ${MAIN_DIR}/dify"
+        [ "$action" = "build" ] && base_cmd+=" up --build"
         [ "$action" = "up" ] && base_cmd+=" up"
         [ "$action" = "upd" ] && base_cmd+=" up -d"
         [ "$action" = "down" ] && base_cmd+=" down"
